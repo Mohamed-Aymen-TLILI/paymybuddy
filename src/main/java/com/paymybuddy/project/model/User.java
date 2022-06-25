@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Data
 public class User implements UserDetails {
-    @Builder.Default
     private String id = UUID.randomUUID().toString();
     private String name;
     private String email;
