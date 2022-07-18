@@ -1,21 +1,19 @@
 package com.paymybuddy.project.model;
 
 import com.sun.istack.NotNull;
-import lombok.Builder;
 import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.Collection;
+
 
 @Data
 @Entity
 @Table(name="user", indexes = @Index(name="user_email_idx",columnList = "email"))
-public class User implements UserDetails {
+public class User {
 
     @Id
     @Column(name = "user_id")
@@ -46,33 +44,4 @@ public class User implements UserDetails {
     @Column(precision = 12,scale=2)
     private BigDecimal balance = BigDecimal.ZERO;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
-        return null;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return false;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return false;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
 }
