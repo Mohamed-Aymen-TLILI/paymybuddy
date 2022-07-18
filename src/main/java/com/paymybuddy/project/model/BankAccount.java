@@ -27,4 +27,8 @@ public class BankAccount {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User accountOwner;
+
+    public Double getBalance() {
+        return balance;
+    }
 }

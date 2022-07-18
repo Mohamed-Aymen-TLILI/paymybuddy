@@ -41,7 +41,7 @@ public class User {
     @Column(length = 80,nullable = false)
     private String password;
 
-    @Column(precision = 12,scale=2)
-    private BigDecimal balance = BigDecimal.ZERO;
+    @Column(name = "user_role")
+    private String userRole;
 
 }
