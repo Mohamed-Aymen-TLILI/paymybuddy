@@ -8,6 +8,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -43,5 +45,8 @@ public class User {
 
     @Column(name = "user_role")
     private String userRole;
+
+    @OneToMany(mappedBy = "user")
+    private List<Contact> contactList = new ArrayList<>();
 
 }

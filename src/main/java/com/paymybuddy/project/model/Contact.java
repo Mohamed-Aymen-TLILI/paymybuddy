@@ -1,22 +1,26 @@
 package com.paymybuddy.project.model;
 
-import javax.persistence.*;
+import lombok.Data;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
+@Data
 @Entity
+@IdClass(ContactId.class)
 @Table(name = "contact")
 public class Contact {
 
+    @NotNull
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="user_id", nullable = false)
+    private User user;
 
 
-    @ManyToOne
-    @JoinColumn(name = "contact_user_id")
-    private User contactUserId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User userId;
+    @NotNull
+    @Id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="user_friend_id", nullable = false)
+    private User ami;
 }

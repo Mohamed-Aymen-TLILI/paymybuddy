@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The type User service.
@@ -78,5 +78,56 @@ public class UserService {
         BankAccount bankAccount = bankAccountRepository.findByAccountOwner_Id(id);
         return bankAccount.getBalance();
         }
+
+    /**
+     * Gets user by id.
+     *
+     * @param id the id
+     * @return the user by id
+     */
+    public User getUserById(int id) throws NoSuchUserException {
+
+        LOGGER.info("Processing to find a user by id");
+
+        if(!userRepository.existsById(id)) {
+            throw new NoSuchUserException("User not found");
+        }
+
+        return userRepository.getById(id);
+    }
+
+    /**
+     * Find user by email user.
+     *
+     * @param email the email
+     * @return the user
+     */
+    public User findUserByEmail(String email) {
+        LOGGER.info("Processing to find a user by email");
+        List<User> users = userRepository.findAll();
+
+        for (User user : users) {
+            if(user.getEmail().equals(email)) {
+                return user;
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Remove user by id.
+     *
+     * @param id the id
+     */
+    public void removeUserById(int id) throws NoSuchUserException {
+        LOGGER.info("Processing to remove user by id");
+
+        if(!userRepository.existsById(id)) {
+            throw new NoSuchUserException("User not found");
+        }
+        userRepository.deleteById(id);
+    }
 
 }
