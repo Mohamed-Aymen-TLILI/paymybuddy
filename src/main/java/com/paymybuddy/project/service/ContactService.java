@@ -57,15 +57,13 @@ public class ContactService {
     /**
      * find contact relationship.
      *
-     * @param userId     id of the user
      * @param userContact the user contact
      * @throws NoSuchUserException the user not found exception
      * @throws ContactException      the contact exception
      */
-    public boolean findContactIsInMyRelationship(int userId, int userContact) throws NoSuchUserException, ContactException {
+    public boolean findContactIsInMyRelationship(int userContact) throws NoSuchUserException, ContactException {
         LOGGER.info("Processing to find if user exist in my list relationship");
-        User firstUser = userService.getUserById(userId);
         User secondUser = userService.getUserById(userContact);
-        return contactRepository.findContactByContactUserIdAndContactUserId(firstUser, secondUser) == null ? false : true;
+        return contactRepository.findContactByAmi_Email(secondUser) == null ? false : true;
     }
 }

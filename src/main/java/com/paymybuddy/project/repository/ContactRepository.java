@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact,Integer> {
 
-    Contact findContactByContactUserIdAndContactUserId(User user, User ami);
+    Contact findContactByAmi_Email( User ami);
 }
