@@ -18,35 +18,27 @@ import java.util.List;
 public class User {
 
     @Id
-    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @NotNull
-    @Email
-    @Size(max = 100)
-    @Column(length = 100,nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @NotNull
-    @Size(max=30)
-    @Column(length = 30,nullable = false)
-    private String firstname;
-
-    @NotNull
-    @Size(max=60)
-    @Column(length = 60,nullable = false)
-    private String lastname;
-
-    @NotNull
-    @Size(max=80)
-    @Column(length = 80,nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "user_role")
-    private String userRole;
+    @Column(nullable = false, length = 45)
+    private String nickname;
 
-    @OneToMany(mappedBy = "user")
-    private List<Contact> contactList = new ArrayList<>();
+    @Column(nullable = false, precision = 18, scale = 2)
+    private double amount;
+
+    @JoinTable(name="connections", joinColumns = {
+            @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
+    }, inverseJoinColumns = {
+            @JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
+    })
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<User> listFriend;
 
 }

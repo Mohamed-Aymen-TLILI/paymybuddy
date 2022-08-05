@@ -13,24 +13,24 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "transactions")
-public class Transaction {
+@Table(name = "bank_transactions")
+public class Bank {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    private User sender;
+    private User user;
 
-    @ManyToOne
-    private User receiver;
+    @Column(length = 34, nullable = false)
+    private String accountNumber;
 
-    private String description;
-
-    @Column(nullable = false, precision = 18, scale = 2)
+    @Column(precision = 18, scale = 2, nullable = false)
     private double amount;
 
     @Column(nullable = false)
     private Date date;
+
 
 }
