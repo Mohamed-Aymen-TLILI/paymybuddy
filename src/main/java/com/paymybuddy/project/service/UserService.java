@@ -1,5 +1,6 @@
 package com.paymybuddy.project.service;
 
+import com.paymybuddy.project.dto.UserDTO;
 import com.paymybuddy.project.exception.NoSuchUserException;
 import com.paymybuddy.project.exception.UserAlreadyExistException;
 import com.paymybuddy.project.model.User;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -34,13 +35,29 @@ public class UserService {
      * @param user the user
      * @throws UserAlreadyExistException the user already exist exception
      */
-    public void saveUser(User user) throws UserAlreadyExistException {
+    public User  saveUser(User user) throws UserAlreadyExistException {
         LOGGER.info("Processing to save a new user in database");
         if(userRepository.existsByEmail(user.getEmail())) {
             throw new UserAlreadyExistException("User already exist in database");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        user.setListFriend(new ArrayList<>());
+         return userRepository.save(user);
+    }
+
+    /**
+     * Update a user's nickname
+     * @param UserDto updated infos
+     */
+    public void updateNickname (UserDTO UserDto){
+        Optional<User> opt = userRepository.findByEmail(UserDto.getEmail());
+        if(opt.isPresent()){
+            User inDB = opt.get();
+            if(!inDB.getNickname().equals(UserDto.getNickname())){
+                inDB.setNickname(UserDto.getNickname());
+                userRepository.save(inDB);
+            }
+        }
     }
 
     /**
@@ -67,34 +84,34 @@ public class UserService {
      * @param id the id
      * @return the user by id
      */
-    public User getUserById(int id) throws NoSuchUserException {
+    public Optional<User> getUserById(Long id) throws NoSuchUserException {
 
         LOGGER.info("Processing to find a user by id");
 
-        if(!userRepository.existsById(id)) {
+        if(!userRepository.findById(id)) {
             throw new NoSuchUserException("User not found");
         }
 
-        return userRepository.getById(id);
+        return userRepository.findById(id);
     }
 
     /**
-     * Find user by email user.
-     *
+     * Find a user by email
      * @param email the email
-     * @return the user
+     * @return optional of a user
      */
-    public User findUserByEmail(String email) {
-        LOGGER.info("Processing to find a user by email");
-        List<User> users = userRepository.findAll();
+    public Optional<User> getByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
 
-        for (User user : users) {
-            if(user.getEmail().equals(email)) {
-                return user;
-            }
-        }
-
-        return null;
+    /**
+     * Add a friend in the list
+     * @param owner user owning the connection
+     * @param target target of the connection
+     */
+    public void addFriend(User owner, User target){
+        owner.getListFriend().add(target);
+        userRepository.save(owner);
     }
 
 
