@@ -88,7 +88,7 @@ public class UserService {
 
         LOGGER.info("Processing to find a user by id");
 
-        if(!userRepository.findById(id)) {
+        if(userRepository.findById(id).isEmpty()) {
             throw new NoSuchUserException("User not found");
         }
 
