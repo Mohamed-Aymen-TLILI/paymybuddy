@@ -92,4 +92,28 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
+
+    /** Delete a friend, require two users
+     *
+     * @param fromUser the owner's id
+     * @param toUser the target's id
+     * @return 200 success | 400 otherwise
+     */
+    @PutMapping(value = "/removeFriend/{fromUser}/{toUser}")
+    public ResponseEntity removeFriend(@PathVariable Long fromUser, @PathVariable Long toUser){
+        // If one user don't exist, return bad request
+        if (userService.getUserById(fromUser).isEmpty() || userService.getUserById(toUser).isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        User owner = userService.getUserById(fromUser).get();
+        User target = userService.getUserById(toUser).get();
+        // Delete connection
+        if (owner.getListFriend().contains(target)){
+            userService.removeFriend(owner, target);
+            LOGGER.info("Remove friend success");
+            return ResponseEntity.ok().build();
+        }
+        LOGGER.info(owner.getListFriend().toString());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
 }

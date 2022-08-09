@@ -114,6 +114,16 @@ public class UserService {
         userRepository.save(owner);
     }
 
+    /**
+     * Delete a friend in the list
+     * @param owner user owning the connection
+     * @param target target of the connection
+     */
+    public void removeFriend(User owner, User target){
+        owner.getListFriend().remove(target);
+        userRepository.save(owner);
+    }
+
 
     /**
      * Remove user by id.
