@@ -1,7 +1,7 @@
 package com.paymybuddy.project.model;
 
 import com.sun.istack.NotNull;
-import lombok.Data;
+import lombok.*;
 
 
 import javax.persistence.*;
@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name="user", indexes = @Index(name="user_email_idx",columnList = "email"))
+@Table(name = "users")
 public class User {
 
     @Id
@@ -40,5 +43,12 @@ public class User {
     })
     @ManyToMany(fetch = FetchType.EAGER)
     private List<User> listFriend;
+
+    public User (String email, String password, String nickname) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+
+    }
 
 }

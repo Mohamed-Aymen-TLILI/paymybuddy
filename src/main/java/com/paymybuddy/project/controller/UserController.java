@@ -1,7 +1,13 @@
 package com.paymybuddy.project.controller;
 
 import com.paymybuddy.project.dto.UserDTO;
+import com.paymybuddy.project.dto.UserRequestDTO;
+import com.paymybuddy.project.exception.NoSuchUserException;
 import com.paymybuddy.project.model.User;
+import com.paymybuddy.project.security.model.request.JwtRequest;
+import com.paymybuddy.project.security.model.response.JwtResponse;
+import com.paymybuddy.project.security.service.AuthenticationService;
+import com.paymybuddy.project.security.service.UserDetailsImpl;
 import com.paymybuddy.project.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -9,11 +15,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+
+@RestController
+@Transactional(propagation = Propagation.REQUIRES_NEW)
 public class UserController {
+
+    @Autowired
+    private AuthenticationService userDetailsService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -25,18 +42,21 @@ public class UserController {
 
     /**
      * Create new user in DB
-     * @param user the user to be create in DB
      * @return 200 successful | 400 failed
      */
-    @PostMapping(value = "/user")
-    public ResponseEntity createUser(@RequestBody User user){
-        // Create if user email isn't in DB
-        if(userService.getByEmail(user.getEmail()).isEmpty()){
-            userService.saveUser(user);
-            LOGGER.info("Success create User");
-            return ResponseEntity.ok(modelMapper.map(user, UserDTO.class));
-        }
-        return ResponseEntity.badRequest().build();
+    @PostMapping(value = "/paymybuddy/register")
+    public ResponseEntity<String> Register(@RequestBody JwtRequest registerRequest){
+        return ResponseEntity.ok(userDetailsService.save(registerRequest));
+    }
+
+    /**
+     * login user in app
+     * @return 200 successful | 400 failed
+     */
+    @PostMapping(value = "/paymybuddy/login")
+    public ResponseEntity<JwtResponse> createAuthenticationToken(@RequestBody JwtRequest jwtRequest) {
+        JwtResponse authenticationToken = userDetailsService.createAuthenticationToken(jwtRequest);
+        return authenticationToken == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(authenticationToken);
     }
 
     /**
@@ -44,14 +64,31 @@ public class UserController {
      * @param email the user's email
      * @return a userDto, BAD_REQUEST if the user doesn't exist.
      */
-    @GetMapping(value ="/getUser")
-    public ResponseEntity<UserDTO> getByEmail(@RequestParam("email") String email){
-        Optional<User> user = userService.getByEmail(email);
-        if(user.isEmpty()){
+    @GetMapping(value ="api/getuserbyemail")
+    public ResponseEntity<UserRequestDTO> getByEmail(@RequestParam String email, Authentication authentication){
+        User user = userService.getByEmail(email);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        if(user == null || user.getEmail() == userDetails.getUsername() ){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         LOGGER.info("Success find user by email");
-        return ResponseEntity.ok(modelMapper.map(user.get(), UserDTO.class));
+        return ResponseEntity.ok(modelMapper.map(user, UserRequestDTO.class));
+    }
+
+    /**
+     * Get users by authentication
+     * @return list User, BAD_REQUEST if the user doesn't exist.
+     */
+    @GetMapping(value ="api/getallcontactbyuser")
+    public List<UserRequestDTO> getAllContact(Authentication authentication){
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Long fromUser = userDetails.getId();
+        Optional<User> user = userService.getUserById(fromUser);
+        if(user.isPresent()) {
+
+        LOGGER.info("Success find users");
+        return user.get().getListFriend().stream().map(u -> new UserRequestDTO(u.getEmail(), u.getNickname())).collect(Collectors.toList());}
+        throw new NoSuchUserException("User contacts not found");
     }
 
     /**
@@ -59,9 +96,11 @@ public class UserController {
      * @param userDTO user's email and new nickname
      * @return 200 success | 400 failed
      */
-    @PutMapping(value = "/user")
-    public ResponseEntity<UserDTO> updatePseudo(@RequestBody UserDTO userDTO){
-        if(userService.getByEmail(userDTO.getEmail()).isPresent()){
+    @PutMapping(value = "api/update/user")
+    public ResponseEntity<UserDTO> updatePseudo(@RequestBody UserDTO userDTO, Authentication authentication){
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String fromUser = userDetails.getUsername();
+        if(userService.getByEmail(fromUser) != null){
             userService.updateNickname(userDTO);
             LOGGER.info("Success update user pseudo");
             return ResponseEntity.ok(userDTO);
@@ -72,13 +111,15 @@ public class UserController {
 
     /**
      * Add a friend, require two users
-     * @param fromUser the owner's id
+     * @param authentication the owner's id
      * @param toUser the target's id
      * @return 201 success | 400 otherwise
      */
-    @PutMapping(value = "/addFriend/{fromUser}/{toUser}")
-    public ResponseEntity addFriend(@PathVariable Long fromUser, @PathVariable Long toUser){
+    @PutMapping(value = "api/addFriend/{toUser}")
+    public ResponseEntity addFriend(@PathVariable Long toUser, Authentication authentication){
         // If one user don't exist, return bad request
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Long fromUser = userDetails.getId();
         if (userService.getUserById(fromUser).isEmpty() || userService.getUserById(toUser).isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -95,13 +136,15 @@ public class UserController {
 
     /** Delete a friend, require two users
      *
-     * @param fromUser the owner's id
+     * @param authentication the owner's id
      * @param toUser the target's id
      * @return 200 success | 400 otherwise
      */
-    @PutMapping(value = "/removeFriend/{fromUser}/{toUser}")
-    public ResponseEntity removeFriend(@PathVariable Long fromUser, @PathVariable Long toUser){
+    @PutMapping(value = "api/removeFriend/{toUser}")
+    public ResponseEntity removeFriend(@PathVariable Long toUser, Authentication authentication){
         // If one user don't exist, return bad request
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        Long fromUser = userDetails.getId();
         if (userService.getUserById(fromUser).isEmpty() || userService.getUserById(toUser).isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

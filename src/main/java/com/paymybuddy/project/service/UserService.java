@@ -50,9 +50,9 @@ public class UserService {
      * @param UserDto updated infos
      */
     public void updateNickname (UserDTO UserDto){
-        Optional<User> opt = userRepository.findByEmail(UserDto.getEmail());
-        if(opt.isPresent()){
-            User inDB = opt.get();
+        User opt = userRepository.findByEmail(UserDto.getEmail());
+        if(opt != null){
+            User inDB = opt;
             if(!inDB.getNickname().equals(UserDto.getNickname())){
                 inDB.setNickname(UserDto.getNickname());
                 userRepository.save(inDB);
@@ -100,7 +100,7 @@ public class UserService {
      * @param email the email
      * @return optional of a user
      */
-    public Optional<User> getByEmail(String email){
+    public User getByEmail(String email){
         return userRepository.findByEmail(email);
     }
 

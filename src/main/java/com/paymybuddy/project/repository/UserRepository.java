@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<User,Integer> {
      * @param email the email
      * @return the optional
      */
-    Optional<User> findByEmail(String email);
+    User findByEmail(String email);
 
     /**
      * Exists by email boolean.
@@ -32,14 +32,4 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     Optional<User> findById(Long id);
 
-
-    /**
-     * Update role.
-     *
-     * @param id   the id
-     * @param role the role
-
-    @Modifying
-    @Query("UPDATE User u SET u.userRole = :role WHERE u.id = :id")
-    public void updateRole(int id, String role); */
 }
