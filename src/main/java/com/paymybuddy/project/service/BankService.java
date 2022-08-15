@@ -3,6 +3,7 @@ package com.paymybuddy.project.service;
 import com.paymybuddy.project.model.Bank;
 import com.paymybuddy.project.model.User;
 import com.paymybuddy.project.repository.BankRepository;
+import com.paymybuddy.project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,19 +20,22 @@ public class BankService {
     private BankRepository bankRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private UserService userService;
 
     /**
      * Create an object BankTransaction
      * @param user user for the transaction
-     * @param accountNumber account number of bank account
+     * @param iban account number of bank account
      * @param amount amount of money transferred, positive or negative
      * @return the object BankTransaction
      */
-    public Bank createBankTransaction(User user, String accountNumber, double amount){
+    public Bank createBankTransaction(User user, String iban, double amount){
         Bank transac = new Bank();
         transac.setUser(user);
-        transac.setAccountNumber(accountNumber);
+        transac.setIban(iban);
         transac.setAmount(amount);
         transac.setDate(new Date());
         return transac;
@@ -71,7 +75,7 @@ public class BankService {
             return false;
         }
 
-        userService.saveUser(user);
+        userRepository.save(user);
         return true;
     }
 

@@ -72,12 +72,22 @@ public class TransactionService {
     }
 
     /**
-     * Find all transactions by user
+     * Find all transactions by user sender
      *
      * @param user the user
      * @return List of transactions
      */
-    public List<Transaction> findAllByUser(User user) {
-        return transactionRepository.findAllBySenderOrReceiver(user, user);
+    public List<Transaction> findAllByUserSender(User user) {
+        return transactionRepository.findAllBySender(user);
+    }
+
+    /**
+     * Find all transactions by user receiver
+     *
+     * @param user the user
+     * @return List of transactions
+     */
+    public List<Transaction> findAllByUserReceiver(User user) {
+        return transactionRepository.findAllByReceiver(user);
     }
 }

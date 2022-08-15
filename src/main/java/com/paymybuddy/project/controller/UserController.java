@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class UserController {
 
@@ -68,10 +69,26 @@ public class UserController {
     public ResponseEntity<UserRequestDTO> getByEmail(@RequestParam String email, Authentication authentication){
         User user = userService.getByEmail(email);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        if(user == null || user.getEmail() == userDetails.getUsername() ){
+        if(user == null || user.getEmail().equals(userDetails.getUsername()) ) {
+            LOGGER.info("fail find user by email");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         LOGGER.info("Success find user by email");
+        return ResponseEntity.ok(modelMapper.map(user, UserRequestDTO.class));
+    }
+
+    /**
+     * Get user by mail
+     * @return a userDto, BAD_REQUEST if the user doesn't exist.
+     */
+    @GetMapping(value ="api/getuserbyid")
+    public ResponseEntity<UserRequestDTO> getById( Authentication authentication){
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        User user = userService.findUserById(userDetails.getId());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        LOGGER.info("Success find user by id");
         return ResponseEntity.ok(modelMapper.map(user, UserRequestDTO.class));
     }
 

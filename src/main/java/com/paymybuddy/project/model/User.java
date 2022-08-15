@@ -41,10 +41,18 @@ public class User {
     }, inverseJoinColumns = {
             @JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
     })
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private List<User> listFriend;
 
     public User (String email, String password, String nickname) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+
+    }
+
+    public User (Long id, String email, String password, String nickname) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.nickname = nickname;

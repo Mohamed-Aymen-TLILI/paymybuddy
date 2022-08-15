@@ -24,7 +24,7 @@ public class Bank {
     private User user;
 
     @Column(length = 34, nullable = false)
-    private String accountNumber;
+    private String iban;
 
     @Column(precision = 18, scale = 2, nullable = false)
     private double amount;

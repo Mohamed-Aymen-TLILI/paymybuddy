@@ -1,5 +1,6 @@
 package com.paymybuddy.project.repository;
 
+import com.fasterxml.jackson.datatype.jsr310.ser.YearSerializer;
 import com.paymybuddy.project.model.Transaction;
 import com.paymybuddy.project.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,14 +15,7 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction,Integer> {
 
-    /**
-     * Find all transactions by bank account iban list.
-     *
-     * @param
-     * @return the list
+    List<Transaction> findAllBySender(User user);
 
-    @Query("SELECT t FROM Transaction t WHERE t.creditor.iban =: iban OR t.debtor.iban = :iban ORDER BY t.date DESC")
-    List<Transaction> findAllTransactionsByBankAccountIban(String iban);*/
-
-    List<Transaction> findAllBySenderOrReceiver(User first, User second);
+    List<Transaction> findAllByReceiver(User user);
 }

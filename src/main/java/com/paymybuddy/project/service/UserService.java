@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -96,6 +97,23 @@ public class UserService {
     }
 
     /**
+     * Gets user by id.
+     *
+     * @param id the id
+     * @return the user by id
+     */
+    public User findUserById(Long id) throws NoSuchUserException {
+
+        LOGGER.info("Processing to find a user by id");
+
+        if(userRepository.findById(id).isEmpty()) {
+            throw new NoSuchUserException("User not found");
+        }
+
+        return userRepository.getById(id);
+    }
+
+    /**
      * Find a user by email
      * @param email the email
      * @return optional of a user
@@ -137,6 +155,14 @@ public class UserService {
             throw new NoSuchUserException("User not found");
         }
         userRepository.deleteById(id);
+    }
+
+    /**
+     * Get all users
+     * @return a list of all users in DB
+     */
+    public List<User> getAll(){
+        return userRepository.findAll();
     }
 
 }
