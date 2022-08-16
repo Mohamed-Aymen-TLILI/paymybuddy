@@ -12,5 +12,5 @@ import lombok.Setter;
 public class UserDTO {
     private String email;
     private String nickname;
-    private String amount;
+    private Double amount;
 }

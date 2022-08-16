@@ -2,58 +2,127 @@ package com.paymybuddy.project.service;
 
 
 import com.paymybuddy.project.data.TestData;
+import com.paymybuddy.project.dto.UserDTO;
 import com.paymybuddy.project.model.User;
 import com.paymybuddy.project.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
+
+
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyIterable;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
 
 @SpringBootTest()
 public class UserServiceTest {
 
-    @Autowired
-    private UserService userService;
+    @Configuration
+    static class ContextConfiguration {
 
-    @MockBean
-    private UserRepository userRepositoryMock;
+        // this bean will be injected into the OrderServiceTest class
+        @Bean
+        public UserService userService() {
+            UserService userService = new UserService(userRepositoryMock);
+            // set properties, etc.
+            return userService;
+        }
 
-    private User user;
+        private UserRepository userRepositoryMock = mock(UserRepository.class);
 
-    @BeforeEach
-    void setUp() {
-        SecurityContext securityContext = new SecurityContextImpl();
-        securityContext.setAuthentication(new TestingAuthenticationToken(TestData.getPrincipal(), null, Collections.emptyList()));
-        SecurityContextHolder.setContext(securityContext);
+
+        private UserService userService = mock(UserService.class);
+
+        private User createUser(String email) {
+            User user = new User();
+            user.setNickname("Test");
+            user.setEmail(email);
+            user.setPassword("password");
+            return user;
+        }
+
+
+        @Test
+        void findByIdEmailTest() {
+            String email = "test@test.com";
+            User person = new User();
+            person.setEmail("test@test.com");
+            person.setNickname("Test");
+            List<User> personList = new ArrayList<>();
+            personList.add(person);
+            when(userService.getByEmail(email)).thenReturn(person);
+            assertThat(person.getNickname()).isEqualTo(TestData.getTrueUserData().getNickname());
+        }
+
+        @Test
+        void findAllTest() {
+            String email = "test@test.com";
+            User person = new User();
+            person.setEmail(email);
+            person.setNickname("Test");
+            List<User> personList = new ArrayList<>();
+            personList.add(person);
+            when(userService.getAll()).thenReturn(personList);
+            assertEquals(1, userService.getAll().size());
+        }
+
+        @Test
+        void updateUserTest() {
+            String email = "test@test.com";
+            UserDTO userDTO = new UserDTO("test@test.com", "Hello", 20.00);
+            User test = createUser(email);
+            List<User> personList = new ArrayList<>();
+            personList.add(test);
+            when(userService.getAll()).thenReturn(personList);
+            assertEquals(1, userService.getAll().size());
+            assertThat(test.getNickname()).isEqualTo(TestData.getTrueUserData().getNickname());
+            Mockito.doNothing().when(userService).updateNickname(any());
+            assertThat(test.getNickname()).isEqualTo(TestData.getTrueUserData().getNickname());
+        }
+
+        @Test
+        void addUserTest() {
+            String email = "test@test.com";
+            String email2 = "te@test.com";
+            UserDTO userDTO = new UserDTO("test@test.com", "Hello", 20.00);
+            User test = createUser(email);
+            User test2 = createUser(email2);
+            ArgumentCaptor<User> idCapture = ArgumentCaptor.forClass(User.class);
+            ArgumentCaptor<User> nameCapture = ArgumentCaptor.forClass(User.class);
+            doNothing().when(userService).addFriend(idCapture.capture(),nameCapture.capture());
+            userService.addFriend(test, test2);
+            assertEquals(test, idCapture.getValue());
+            assertEquals(test2, nameCapture.getValue());
+        }
+
+        @Test
+        void removeUserTest() {
+            String email = "test@test.com";
+            String email2 = "te@test.com";
+            UserDTO userDTO = new UserDTO("test@test.com", "Hello", 20.00);
+            User test = createUser(email);
+            User test2 = createUser(email2);
+            ArgumentCaptor<User> idCapture = ArgumentCaptor.forClass(User.class);
+            ArgumentCaptor<User> nameCapture = ArgumentCaptor.forClass(User.class);
+            doNothing().when(userService).removeFriend(idCapture.capture(),nameCapture.capture());
+            userService.removeFriend(test, test2);
+            assertEquals(test, idCapture.getValue());
+            assertEquals(test2, nameCapture.getValue());
+        }
+
     }
 
 }
