@@ -17,11 +17,17 @@ import java.util.List;
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class TransactionService {
 
-    @Autowired
+
     private UserRepository userRepository;
 
-    @Autowired
+
     private TransactionRepository transactionRepository;
+
+    public TransactionService(UserRepository userRepository, TransactionRepository transactionRepository ) {
+        this.userRepository = userRepository;
+        this.transactionRepository= transactionRepository;
+
+    }
 
     /**
      * Check if payment authorized or not

@@ -33,4 +33,12 @@ public class Transaction {
     @Column(nullable = false)
     private Date date;
 
+    public Transaction(User sender, User receiver, String description, double amount, Date date) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.description = description;
+        this.amount = amount;
+        this.date = date;
+    }
+
 }
