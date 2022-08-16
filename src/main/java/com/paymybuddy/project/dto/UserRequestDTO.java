@@ -11,6 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequestDTO {
+    private Long id;
     private String email;
     private String nickname;
+    private Double amount;
 }

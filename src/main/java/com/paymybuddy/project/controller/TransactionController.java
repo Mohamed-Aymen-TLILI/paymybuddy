@@ -44,7 +44,7 @@ public class TransactionController {
      * @param transac the transaction infos
      * @return 200 if successful | 400 if failed
      */
-    @PostMapping(value = "/transaction")
+    @PostMapping(value = "api/transaction")
     public ResponseEntity makeTransaction(@RequestBody TransactionDTO transac){
         if(transacService.makePayment(transac)){
             LOGGER.info("Transaction success");

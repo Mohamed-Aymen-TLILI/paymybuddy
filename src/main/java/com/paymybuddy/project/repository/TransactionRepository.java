@@ -1,10 +1,8 @@
 package com.paymybuddy.project.repository;
 
-import com.fasterxml.jackson.datatype.jsr310.ser.YearSerializer;
 import com.paymybuddy.project.model.Transaction;
 import com.paymybuddy.project.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

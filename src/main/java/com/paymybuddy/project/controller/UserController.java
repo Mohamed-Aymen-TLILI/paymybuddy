@@ -66,15 +66,15 @@ public class UserController {
      * @return a userDto, BAD_REQUEST if the user doesn't exist.
      */
     @GetMapping(value ="api/getuserbyemail")
-    public ResponseEntity<UserRequestDTO> getByEmail(@RequestParam String email, Authentication authentication){
+    public UserRequestDTO getByEmail(@RequestParam String email, Authentication authentication){
         User user = userService.getByEmail(email);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         if(user == null || user.getEmail().equals(userDetails.getUsername()) ) {
             LOGGER.info("fail find user by email");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return null;
         }
         LOGGER.info("Success find user by email");
-        return ResponseEntity.ok(modelMapper.map(user, UserRequestDTO.class));
+        return modelMapper.map(user, UserRequestDTO.class);
     }
 
     /**
@@ -104,7 +104,7 @@ public class UserController {
         if(user.isPresent()) {
 
         LOGGER.info("Success find users");
-        return user.get().getListFriend().stream().map(u -> new UserRequestDTO(u.getEmail(), u.getNickname())).collect(Collectors.toList());}
+        return user.get().getListFriend().stream().map(u -> new UserRequestDTO(u.getId(), u.getEmail(), u.getNickname(), u.getAmount())).collect(Collectors.toList());}
         throw new NoSuchUserException("User contacts not found");
     }
 
